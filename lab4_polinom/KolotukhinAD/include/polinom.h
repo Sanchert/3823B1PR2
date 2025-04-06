@@ -8,9 +8,7 @@
 using namespace std;
 struct Point
     {
-        int x;
-        int y;
-        int z;
+        int x, y, z;
         Point(int _x, int _y, int _z): x(_x), y(_y), z(_z) {}
     };
 struct Monom

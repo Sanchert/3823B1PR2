@@ -131,12 +131,13 @@ public:
     
     void Insert(TKey key, TValue value)
     {
-        if (size == capacity)
-            resize();
-        if (Find(key))
-            return;
-        table[size] = {key, new TValue(value)};
-        size++;
+        if (!Find(key))
+        {    
+            if (size == capacity)
+                resize();
+            table[size] = {key, new TValue(value)};
+            size++;
+        }
     }
 
 

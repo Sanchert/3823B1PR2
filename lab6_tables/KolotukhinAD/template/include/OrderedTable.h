@@ -212,7 +212,7 @@ public:
     PolynomialOrdTableArray() 
     {
         size = 0;
-        capacity = 8; // !
+        capacity = 2;
         table = new TableRec[capacity];
     }
     
@@ -238,17 +238,18 @@ public:
         while(left <= right)
         {
             middle = (left + right) / 2;
-            if ( key < table[middle].key)
+            if (key < table[middle].key)
                 right = middle - 1;
             else if (key > table[middle].key)
                 left = middle + 1;
-            else 
+            else
             {
                 for (int i = middle; i < size - 1; i++)
                 {
                     table[i] = table[i + 1];
                 }
                 size--;
+                return;
             }
         }
     }

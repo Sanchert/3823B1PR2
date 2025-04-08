@@ -13,7 +13,7 @@ private:
         TKey key;
         TValue *value;
     };
-    vector<TableRec> data {};
+    std::vector<TableRec> data {};
 public:
 
     OrderedTable() {};
@@ -39,6 +39,7 @@ public:
                     data[i] = data[i + 1];
                 }
                 data.pop_back();
+                return;
             }
         }
     }
@@ -46,11 +47,11 @@ public:
     TValue* Find(TKey _key)
     {
         int middle, left = 0, right = data.size();
-        while(left <= right)
+        while(left < right)
         {
             middle = (left + right) / 2;
             if ( _key < data[middle].key)
-                right = middle - 1;
+                right = middle;
             else if (_key > data[middle].key)
                 left = middle + 1;
             else 
@@ -61,27 +62,28 @@ public:
     
     void Insert(TKey _key, TValue value)
     {
-        if (data.size() == 0)
+        if (!Find(_key))
         {
             data.push_back({_key, new TValue(value)});
-        }
-        else if (!Find(_key))
-        {
-            for (int i = 0; i < data.size(); i++)
-            {
-                if (data[i].key > _key)
-                {
-                    data.push_back(data[data.size() - 1]);
-                    for (int j = data.size() - 1; j > i; j--)
-                    {
-                        data[j] = data[j - 1];
-                    }
-                    delete data[i];
-                    data[i] = TableRec{_key, new TValue(value)};
-                    return;
-                }
+            
+            int left = 0; 
+            int right = data.size() - 1;
+            int mid;
+            while (left < right) {
+                mid = (right + left) / 2;
+                if (data[mid].key > _key)
+                    right = mid;
+                else
+                    left = mid + 1;
             }
-            data.push_back({_key, new TValue(value)});
+
+            if (left < data.size() - 1) {
+                for (int i = data.size() - 1; i > left; i--)
+                {
+                    data[i] = data[i - 1];
+                }
+                data[left] = TableRec{_key, new TValue(value)};
+            }
         }
     }
 
@@ -130,6 +132,7 @@ public:
                     data[i] = data[i + 1];
                 }
                 data.pop_back();
+                return;
             }
         }
     }
@@ -137,7 +140,7 @@ public:
     Polynomial* Find(TKey _key)
     {
         int middle, left = 0, right = data.size();
-        while(left <= right)
+        while(left < right)
         {
             middle = (left + right) / 2;
             if ( _key < data[middle].key)
@@ -191,8 +194,6 @@ public:
         }
     }
 };
-
-
 
 template <typename TKey>
 class PolynomialOrdTableArray
@@ -332,6 +333,8 @@ public:
     }
 };
 
+
+// need a Doubly Linked List?
 template <typename TKey>
 class PolynomialOrdTableList
 {
@@ -352,33 +355,15 @@ public:
 
     void Delete(TKey key)
     {
-        for (int i = 0; i < table.getSize(); i++)
-        {
-            if (table[i].key == key)
-            {
-                table.removeFrom(i);
-                return;
-            }
-        }
     }
 
     Polynomial* Find(TKey key)
     {
-        for (int i = 0; i < table.getSize(); i++)
-        {
-            if (table[i].key == key)
-            {
-                return &table[i].polynomial;
-            }
-        }
         return nullptr;
     }
     
     void Insert(TKey key, Polynomial polynomial)
     {
-        if (Find(key))
-            return;
-        table.pushBack({key, polynomial});
     }
 
     void Print()

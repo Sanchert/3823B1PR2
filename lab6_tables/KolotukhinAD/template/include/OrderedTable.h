@@ -204,15 +204,15 @@ private:
         Polynomial polynomial;
         double result;
     };
-    int capacity;
-    int size;
+    size_t capacity;
+    size_t size;
     TableRec* table;
 public:
 
     PolynomialOrdTableArray() 
     {
         size = 0;
-        capacity = 2;
+        capacity = 8; // !
         table = new TableRec[capacity];
     }
     
@@ -234,39 +234,73 @@ public:
 
     void Delete(TKey key)
     {
-        for (int i = 0; i < size; i++)
+        int middle, left = 0, right = size;
+        while(left <= right)
         {
-            if (table[i].key == key)
+            middle = (left + right) / 2;
+            if ( key < table[middle].key)
+                right = middle - 1;
+            else if (key > table[middle].key)
+                left = middle + 1;
+            else 
             {
-                table[i] = table[size - 1];
+                for (int i = middle; i < size - 1; i++)
+                {
+                    table[i] = table[i + 1];
+                }
                 size--;
-                return;
             }
         }
     }
 
     Polynomial* Find(TKey key)
     {
-        for (int i = 0; i < size; i++)
+        int middle, left = 0, right = size;
+        while(left <= right)
         {
-            if (table[i].key == key)
-            {
-                return &table[i].polynomial;
-            }
+            middle = (left + right) / 2;
+            if (key < table[middle].key)
+                right = middle - 1;
+            else if (key > table[middle].key)
+                left = middle + 1;
+            else 
+                return &table[middle].polynomial;
         }
         return nullptr;
     }
     
-    void Insert(TKey key, Polynomial p)
+    void Insert(TKey key, Polynomial p) 
     {
-        if (size == capacity)
-            resize();
-        if (Find(key))
-            return;
-        table[size] = {key, p};
-        size++;
-    }
+        if (!Find(key))
+        {
+            if (size == capacity)
+                resize();
+        
+            int left = 0; 
+            int right = size;
+            int mid;
+            while (left < right) {
+                mid = (right + left) / 2;
+                if (table[mid].key > key)
+                    right = mid;
+                else
+                    left = mid + 1;
+            }
 
+            if (left < size) {
+                for (int i = size; i > left; i--)
+                {
+                    table[i] = table[i - 1];
+                }
+                table[left] = {key, p, 0};
+            }
+            else
+            {
+                table[size] = {key, p, 0};
+            }
+            size++;
+        }
+    }
 
     void Print()
     {

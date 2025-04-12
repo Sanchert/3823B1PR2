@@ -20,7 +20,7 @@ public:
 
     size_t GetSize() const { return data.size(); }
 
-    TValue& operator[](size_t pos) { return &(data[pos].value); }
+    TValue& operator[](size_t pos) { return *data[pos].value; }
 
     void Delete(TKey _key)
     {
@@ -195,6 +195,143 @@ public:
     }
 };
 
+template <typename TKey, typename TValue>
+class OrdTableArray
+{
+private:
+    struct TableRec
+    {
+        TKey key;
+        TValue value;
+    };
+    size_t capacity;
+    size_t size;
+    TableRec* table;
+public:
+
+    OrdTableArray() 
+    {
+        size = 0;
+        capacity = 2;
+        table = new TableRec[capacity];
+    }
+    
+    ~OrdTableArray() 
+    {
+        delete[] table;
+    }
+
+    size_t GetSize() const { return size; }
+    
+    size_t GetCapacity() const { return capacity; }
+
+    TValue& operator[](size_t pos) 
+    {
+        if (pos < size)
+            return table[pos].value;
+        throw out_of_range("Index out of range");
+    }
+
+    void Delete(TKey key)
+    {
+        int middle, left = 0, right = size;
+        while(left <= right)
+        {
+            middle = (left + right) / 2;
+            if (key < table[middle].key)
+                right = middle - 1;
+            else if (key > table[middle].key)
+                left = middle + 1;
+            else
+            {
+                for (int i = middle; i < size - 1; i++)
+                {
+                    table[i] = table[i + 1];
+                }
+                size--;
+                return;
+            }
+        }
+    }
+
+    TValue* Find(TKey key)
+    {
+        int middle, left = 0, right = size;
+        while(left <= right)
+        {
+            middle = (left + right) / 2;
+            if (key < table[middle].key)
+                right = middle - 1;
+            else if (key > table[middle].key)
+                left = middle + 1;
+            else 
+                return &table[middle].value;
+        }
+        return nullptr;
+    }
+    
+    void Insert(TKey key, TValue value) 
+    {
+        if (!Find(key))
+        {
+            if (size == capacity)
+                resize();
+        
+            int left = 0; 
+            int right = size;
+            int mid;
+            while (left < right) {
+                mid = (right + left) / 2;
+                if (table[mid].key > key)
+                    right = mid;
+                else
+                    left = mid + 1;
+            }
+
+            if (left < size) {
+                for (int i = size; i > left; i--)
+                {
+                    table[i] = table[i - 1];
+                }
+                table[left] = TableRec{key, value};
+            }
+            else
+            {
+                table[size] = TableRec{key, value};
+            }
+            size++;
+        }
+    }
+
+    void Print()
+    {
+        for (int i = 0; i < size; i++)
+        {
+            cout << table[i].key << ": " << table[i].value << endl;
+        }
+    }
+
+    // void Calculate(Point p)
+    // {
+    //     for (int i = 0; i < size; i++)
+    //     {
+    //         table[i].result =  table[i].polynomial.calculate(p);
+    //     }
+    // }
+
+    private: void resize()
+    {
+        capacity *= 2;
+        TableRec* newTable = new TableRec[capacity];
+        for (int i = 0; i < size; i++)
+        {
+            newTable[i] = table[i];
+        }
+        delete[] table;
+        table = newTable;
+    }
+};
+
 template <typename TKey>
 class PolynomialOrdTableArray
 {
@@ -334,7 +471,7 @@ public:
 };
 
 
-// need a Doubly Linked List?
+// what?
 template <typename TKey>
 class PolynomialOrdTableList
 {

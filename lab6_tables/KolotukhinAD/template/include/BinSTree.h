@@ -32,17 +32,80 @@ private:
     {
         if (node == nullptr)
             return nullptr;
-        if (key < node->data.key)
+        else if (key < node->data.key)
             node = FindNode(key, node->left);
-        if (key > node->data.key)
+        else if (key > node->data.key)
             node = FindNode(key, node->right);
         return node;
+    }
+
+    Node* deleteNode(Node* root, TKey key) {
+        if (root == nullptr) 
+        {
+            return root;
+        }
+        if (key < root->data.key) 
+        {
+            root->left = deleteNode(root->left, key);
+        } 
+        else if (key > root->data.key) 
+        {
+            root->right = deleteNode(root->right, key);
+        } 
+        else 
+        {
+            
+            if (root->left == nullptr && root->right == nullptr)
+            {
+                delete root;
+                return nullptr;
+            }
+            else if (root->left == nullptr)
+            {
+                Node* temp = root->right;
+                delete root;
+                return temp;
+            }
+            else if (root->right == nullptr)
+            {
+                Node* temp = root->left;
+                delete root;
+                return temp;
+            }
+            else 
+            {
+                Node* minNode = root->right;
+                while (minNode->left != nullptr) {
+                    minNode = minNode->left;
+                }
+                root->data = minNode->data;
+                root->right = deleteNode(root->right, minNode->data.key);
+            }
+        }
+        return root;
+    }
+
+    int Depth(Node* root)
+    {
+        if (!root)
+            return 0;
+        else
+        {
+            int left_depth = Depth(root->left);
+            int right_depth = Depth(root->right);
+            return max(left_depth, right_depth) + 1;
+        }
     }
 
 public:
     BinSTree() : root(nullptr) {};
     ~BinSTree() {};
     
+    int Depth()
+    {
+        return Depth(root);
+    }
+
     void Print() {
         cout << "table: " << endl;
         Print(root);
@@ -56,28 +119,39 @@ public:
         return &node->data.value;
     }
 
-    // вставка и удаление
-    void Insert(TKey key, TValue value)//, BinSTree* tree)
+    void Insert(TKey key, TValue value)
     {
         if (!Find(key))
         {
+            
             Node* newNode = new Node{TableRec{key, value}, nullptr, nullptr};
-            Node* current = root;
-            Node* parent = nullptr;
-            while (current != nullptr) {
-                parent = current;
-                if (key < current->data.key) {
-                    current = current->left;
-                } else {
-                    current = current->right;
-                }
+            if (root == nullptr)
+            {
+                root = newNode;
             }
-            if (key < parent->data.key) {
-                parent->left = newNode;
-            } else {
-                parent->right = newNode;
+            else
+            {
+                Node* current = root;
+                Node* parent = nullptr;
+                while (current != nullptr) {
+                    parent = current;
+                    if (key < current->data.key) {
+                        current = current->left;
+                    } else {
+                        current = current->right;
+                    }
+                }
+                if (key < parent->data.key) {
+                    parent->left = newNode;
+                } else {
+                    parent->right = newNode;
+                }
             }
         }
     }
 
+    void Delete(TKey key)
+    {
+        root = deleteNode(root, key);    
+    }
 };

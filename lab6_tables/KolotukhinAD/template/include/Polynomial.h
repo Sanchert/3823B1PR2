@@ -13,10 +13,31 @@ struct Point
     };
 struct Monom
 {
-    double multiplier;
+    int multiplier;
     char variable;
     int varPower;
-    Monom(double _multiplier, char _variable, int _varPower): multiplier(_multiplier), variable(_variable), varPower(_varPower) {};
+    Monom(int _multiplier = 0, char _variable = 'x', int _varPower = 0): multiplier(_multiplier), variable(_variable), varPower(_varPower) {};
+    Monom(string monom)
+    {
+        string num = "";
+        for (int i = 0; i < monom.length(); i++)
+        {
+            if (isdigit(monom[i]) || monom[i] == '-')
+            {
+                num += monom[i];
+            }
+            else if (monom[i] == '*')
+            {
+                multiplier = stoi(num);
+                num = "";
+            }
+            else if (monom[i] == '^')
+            {
+                variable = monom[i-1];
+            }
+        }
+        varPower = stoi(num);
+    }
     friend ostream& operator<<(ostream& os, const Monom& m) 
     {
         os << m.multiplier << m.variable << "^" << m.varPower;
@@ -54,6 +75,27 @@ public:
         LIST = other.LIST;
     }
 
+    Polynomial(string expr)
+    {
+        string monom = "";
+        for (int i = 0; i < expr.length(); i++)
+        {
+            if (expr[i] != ' ')
+            {
+                if (expr[i] == '+' || expr[i] == '-')
+                {
+                    LIST.pushBack(Monom(monom));
+                    monom = expr[i] == '-'? "-" : "";
+                } 
+                else
+                {
+                    monom += expr[i];
+                }
+            }
+        }
+        LIST.pushBack(Monom(monom));
+    }
+
     Polynomial(const Monom monoms[], int size)
     {
         for (int i = 0; i < size; i++)
@@ -65,7 +107,8 @@ public:
     friend istream& operator>>(istream& is, Polynomial& polynomial)
     {
         int YesOrNot = 0;
-        double mul = 0.0;
+        int mul = 0;
+        // double mul = 0.0;
         char var = '0';
         int pow = 0;
         

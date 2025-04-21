@@ -5,7 +5,7 @@
 using namespace std;
 
 template <typename TKey, typename TValue>
-class Unorderedtable
+class UnorderedTable
 {
 private:
     struct TableRec
@@ -16,11 +16,11 @@ private:
     vector<TableRec> data {};
 public:
 
-    Unorderedtable() {};
+    UnorderedTable() {};
 
     size_t GetSize() const { return data.size(); }
 
-    TValue& operator[](size_t pos) { return &(data[pos].value); }
+    TValue& operator[](size_t pos) { return *data[pos].value; }
 
     void Delete(TKey key)
     {
@@ -60,6 +60,66 @@ public:
         for (TableRec val : data)
         {
             cout << val.key << ": " << *(val.value) << endl;
+        }
+    }
+};
+
+template <typename TKey, typename TValue>
+class UnorderedTableV
+{
+private:
+    struct TableRec
+    {
+        TKey key;
+        TValue value;
+    };
+    vector<TableRec> data {};
+public:
+
+    UnorderedTableV() {};
+
+    size_t GetSize() const { return data.size(); }
+
+    TValue& operator[](size_t pos) { return data[pos].value; }
+
+    void Delete(TKey key)
+    {
+        for (int i = 0; i < data.size(); i++)
+        {
+            if (data[i].key == key)
+            {
+                data[i] = data[data.size() - 1];
+                data.pop_back();
+                return;
+            }
+        }
+    }
+
+    TValue* Find(TKey key)
+    {
+        for (auto& val : data)
+        {
+            if (val.key == key)
+            {
+                return &val.value;
+            }
+        }
+        return nullptr;
+    }
+    
+    void Insert(TKey key, TValue value)
+    {
+        if (Find(key))
+            return;
+        data.push_back(TableRec{key, value});
+    }
+
+
+    void Print()
+    {
+        for (auto& val : data)
+        {
+            cout << val.key << ": " << val.value << endl;
         }
     }
 };
@@ -163,6 +223,99 @@ public:
 };
 
 template <typename TKey, typename TValue>
+class UnorderedTableArrayV
+{
+private:
+    struct TableRec
+    {
+        TKey key;
+        TValue value;
+    };
+    int capacity;
+    int size;
+    TableRec* table;
+public:
+
+    UnorderedTableArrayV() 
+    {
+        size = 0;
+        capacity = 2;
+        table = new TableRec[capacity];
+    }
+    
+    ~UnorderedTableArrayV() 
+    {
+        delete[] table;
+    }
+
+    size_t GetSize() const { return size; }
+    size_t GetCapacity() const { return capacity; }
+    TValue& operator[](size_t pos) 
+    {
+        if (pos < size)
+            return table[pos].value;
+        throw out_of_range("Index out of range");
+    }
+
+    void Delete(TKey key)
+    {
+        for (int i = 0; i < size; i++)
+        {
+            if (table[i].key == key)
+            {
+                table[i] = table[size - 1];
+                size--;
+                return;
+            }
+        }
+    }
+
+    TValue* Find(TKey key)
+    {
+        for (int i = 0; i < size; i++)
+        {
+            if (table[i].key == key)
+            {
+                return &table[i].value;
+            }
+        }
+        return nullptr;
+    }
+    
+    void Insert(TKey key, TValue value)
+    {
+        if (!Find(key))
+        {    
+            if (size == capacity)
+                resize();
+            table[size] = TableRec{key, value};
+            size++;
+        }
+    }
+
+
+    void Print()
+    {
+        for (int i = 0; i < size; i++)
+        {
+            cout << table[i].key << ": " << table[i].value << endl;
+        }
+    }
+
+    private: void resize()
+    {
+        capacity *= 2; // ограничить maxInt
+        TableRec* newTable = new TableRec[capacity];
+        for (int i = 0; i < size; i++)
+        {
+            newTable[i] = table[i];
+        }
+        delete[] table;
+        table = newTable;
+    }
+};
+
+template <typename TKey, typename TValue>
 class UnorderedTableList
 {
 private:
@@ -177,7 +330,7 @@ public:
 
     size_t GetSize() const { return table.getSize(); }
 
-    TValue& operator[](size_t pos) { return &(table[pos].value); }
+    TValue& operator[](size_t pos) { return *table[pos].value; }
 
     void Delete(TKey key)
     {
@@ -215,6 +368,63 @@ public:
         for (int i = 0; i < table.getSize(); i++)
         {
             cout << table[i].key << ": " << *(table[i].value) << endl;
+        }
+    }
+};
+
+template <typename TKey, typename TValue>
+class UnorderedTableListV
+{
+private:
+    struct TableRec
+    {
+        TKey key;
+        TValue value;
+    };
+    List<TableRec> table {};
+public:
+    UnorderedTableListV() {};
+
+    size_t GetSize() const { return table.getSize(); }
+
+    TValue& operator[](size_t pos) { return table[pos].value; }
+
+    void Delete(TKey key)
+    {
+        for (int i = 0; i < table.getSize(); i++)
+        {
+            if (table[i].key == key)
+            {
+                table.removeFrom(i);
+                return;
+            }
+        }
+    }
+
+    TValue* Find(TKey key)
+    {
+        for (int i = 0; i < table.getSize(); i++)
+        {
+            if (table[i].key == key)
+            {
+                return &table[i].value;
+            }
+        }
+        return nullptr;
+    }
+    
+    void Insert(TKey key, TValue value)
+    {
+        if (Find(key))
+            return;
+        table.pushBack(TableRec{key, value});
+    }
+
+    void Print()
+    {
+        for (int i = 0; i < table.getSize(); i++)
+        {
+            cout << table[i].key << ": " << table[i].value << endl;
         }
     }
 };

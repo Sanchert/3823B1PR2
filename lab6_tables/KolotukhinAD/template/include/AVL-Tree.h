@@ -31,6 +31,19 @@ private:
         Print(p->right);
     }
 
+    void PrintShift(Node* p)
+    {
+        if (p == nullptr)
+            return;
+        std::string tabs;
+        int k = FindLvL(p->data.key);
+        for (int i = 0; i < k; i++)
+            tabs.append(" .. ");
+        cout << tabs << "[" << p->data.key << "]: " << p->data.value << endl;
+        PrintShift(p->left);
+        PrintShift(p->right);
+    }
+
     Node* FindNode(TKey key, Node* node)
     {
         if (node == nullptr)
@@ -40,6 +53,17 @@ private:
         else if (key > node->data.key)
             node = FindNode(key, node->right);
         return node;
+    }
+
+    int FindNodeLvL(TKey key, Node* node)
+    {
+        if (node == nullptr)
+            return 0;
+        else if (key < node->data.key)
+            return FindNodeLvL(key, node->left) + 1;
+        else if (key > node->data.key)
+            return FindNodeLvL(key, node->right) + 1;
+        return 0;
     }
 
     Node* deleteNode(Node* root, TKey key) {
@@ -124,17 +148,14 @@ private:
 
     Node* Balance(Node* node) {
         UpdateBalance(node);
-
         if (node->balance == 2) {
-            if (node->right->balance < 0) {
+            if (node->right->balance < 0) 
                 node->right = RotateRight(node->right);
-            }
             return RotateLeft(node);
         }
         if (node->balance == -2) {
-            if (node->left->balance > 0) {
+            if (node->left->balance > 0)
                 node->left = RotateLeft(node->left);
-            }
             return RotateRight(node);
         }
         return node;
@@ -143,17 +164,25 @@ private:
 public:
     AVLTree() : root(nullptr) {};
     ~AVLTree() {};
-    
+    int FindLvL(TKey key)
+    {
+        return FindNodeLvL(key, root);
+    }
+
     int Depth()
     {
         return Depth(root);
     }
 
     void Print() {
-        cout << "table: " << endl;
+        cout << "Tree: " << endl;
         Print(root);
     }
 
+    void PrintShift() {
+        cout << "Tree: " << endl;
+        PrintShift(root);
+    }
     TValue* Find(TKey key)
     {
         Node* node = FindNode(key, root);
@@ -200,4 +229,3 @@ public:
         root = deleteNode(root, key);    
     }
 };
-
